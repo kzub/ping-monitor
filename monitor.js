@@ -41,7 +41,13 @@ const main = async () => {
         // log.i(writeMetricOpts(payload));
         await request.post(`${config.timeseries.address}/write?db=${config.timeseries.database}`, writeMetricOpts(payload));
       } catch (err) {
-        log.i(err);
+        log.e(`${endpoint.name}: ${err}`);
+        try {
+          const errorPayload = `${endpoint.name},metric=error value=0`;
+          await request.post(`${config.timeseries.address}/write?db=${config.timeseries.database}`, writeMetricOpts(errorPayload));
+        } catch (err) {
+          log.e(`ERROR REPORTING ERROR ${endpoint.name}: ${err}`);
+        }
       }
     }
     await sleep(1000);
